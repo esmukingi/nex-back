@@ -16,10 +16,21 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
+// Allowed origins array
+const allowedOrigins = [
+  "https://nexchat-beta.vercel.app",        // Production frontend
+  "https://nexchat-o6afjsawj-esmukingis-projects.vercel.app", // Preview frontend
+  "http://localhost:3000"                  // Local development
+];
+
+// Socket.io CORS configuration
 const io = new Server(server, {
   cors: {
-    origin: "https://nexchat-o6afjsawj-esmukingis-projects.vercel.app",
-  },
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+  }
 });
 
 const { getReceiverSocketId } = initializeSocket(io); // Initialize Socket.io and get function
@@ -30,13 +41,15 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 
+// Express CORS middleware
 app.use(
   cors({
-    origin: "https://nexchat-beta.vercel.app",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
 
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/contacts", contactRoute);
