@@ -18,7 +18,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://nexchat-beta.vercel.app",
+    origin: "https://nexchat-o6afjsawj-esmukingis-projects.vercel.app",
   },
 });
 
