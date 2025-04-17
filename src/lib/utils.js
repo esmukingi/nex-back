@@ -1,4 +1,3 @@
-// lib/utils.js
 import jwt from 'jsonwebtoken';
 
 export const generateToken = (userId, res) => {
@@ -14,6 +13,6 @@ export const generateToken = (userId, res) => {
     path: '/',
   });
 
-  console.log('Cookie set:', { token, secure: true, sameSite: 'none' }); // Debug log
+  console.log('Cookie set:', { token, secure: true, sameSite: 'none', path: '/', timestamp: new Date().toISOString() });
   return token;
 };
