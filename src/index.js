@@ -32,20 +32,36 @@ const corsOptions = {
     }
   },
   credentials: true,
-  exposedHeaders: ['set-cookie'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie'],
 };
+
+// Apply CORS to all routes
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
 app.use("/api/*", (req, res) => {
   res.status(404).json({ error: "API endpoint not found" });
 });
 // Socket.io with enhanced options
 const io = new Server(server, {
-  cors: corsOptions,
+  cors: {
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST'],
+  },
   connectionStateRecovery: {
-    maxDisconnectionDuration: 2 * 60 * 1000,  // 2 minutes
-    skipMiddlewares: true
-  }
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    skipMiddlewares: true,
+  },
 });
 
 const { getReceiverSocketId } = initializeSocket(io);

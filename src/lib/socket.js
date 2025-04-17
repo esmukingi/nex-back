@@ -4,9 +4,10 @@ import User from "../models/user.model.js";
 export function initializeSocket(io) {
   const userSocketMap = {};
 
-  io.use(async (socket, next) => {
+  o.use(async (socket, next) => {
     try {
-      const token = socket.request.cookies?.jwt || socket.handshake.auth?.token;
+      const token = socket.request.cookies?.jwt;
+      console.log('Socket token:', token); // Debug log
       if (!token) {
         return next(new Error('Authentication error: No token provided'));
       }
@@ -24,7 +25,6 @@ export function initializeSocket(io) {
       next(new Error('Authentication failed'));
     }
   });
-
   io.on("connection", (socket) => {
     console.log(`User ${socket.user._id} connected`);
     userSocketMap[socket.user._id] = socket.id;
