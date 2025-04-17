@@ -1,22 +1,21 @@
-import { generateToken } from "../lib/utils.js";
-import User from "../models/user.model.js";
-import bcrypt from "bcryptjs";
-import cloudinary from "../lib/cloudinary.js";
+import { generateToken } from '../lib/utils.js';
+import User from '../models/user.model.js';
+import bcrypt from 'bcryptjs';
+import cloudinary from '../lib/cloudinary.js';
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
   try {
     if (!fullName || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: 'All fields are required' });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
 
     const user = await User.findOne({ email });
-
-    if (user) return res.status(400).json({ message: "Email already exists" });
+    if (user) return res.status(400).json({ message: 'Email already exists' });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -38,15 +37,14 @@ export const signup = async (req, res) => {
         profilePic: newUser.profilePic,
       });
     } else {
-      res.status(400).json({ message: "Invalid user data" });
+      res.status(400).json({ message: 'Invalid user data' });
     }
   } catch (error) {
-    console.log("Error in signup controller", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.log('Error in signup controller:', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
-// auth.controller.js
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -61,7 +59,7 @@ export const login = async (req, res) => {
     }
 
     const token = generateToken(user._id, res);
-    console.log('Login token set:', token); // Debug log
+    console.log('Login token set:', token);
 
     res.status(200).json({
       _id: user._id,
@@ -77,42 +75,43 @@ export const login = async (req, res) => {
 
 export const logout = (req, res) => {
   try {
-    res.cookie("jwt", "", { 
+    res.cookie('jwt', '', {
       maxAge: 0,
       httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production"
+      sameSite: 'none',
+      secure: true,
     });
-    res.status(200).json({ message: "Logged out successfully" });
+    res.status(200).json({ message: 'Logged out successfully' });
   } catch (error) {
-    console.log("Error in logout controller", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.log('Error in logout controller:', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 export const checkAuth = (req, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
+      return res.status(401).json({ message: 'Not authenticated' });
     }
     res.status(200).json({
       _id: req.user._id,
       fullName: req.user.fullName,
       email: req.user.email,
-      profilePic: req.user.profilePic
+      profilePic: req.user.profilePic,
     });
   } catch (error) {
-    console.log("Error in checkAuth controller", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.log('Error in checkAuth controller:', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
 export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;
     const userId = req.user._id;
 
     if (!profilePic) {
-      return res.status(400).json({ message: "Profile pic is required" });
+      return res.status(400).json({ message: 'Profile pic is required' });
     }
 
     const uploadResponse = await cloudinary.uploader.upload(profilePic);
@@ -122,9 +121,14 @@ export const updateProfile = async (req, res) => {
       { new: true }
     );
 
-    res.status(200).json(updatedUser);
+    res.status(200).json({
+      _id: updatedUser._id,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      profilePic: updatedUser.profilePic,
+    });
   } catch (error) {
-    console.log("error in update profile:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.log('Error in updateProfile controller:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
