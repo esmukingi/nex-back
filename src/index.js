@@ -35,7 +35,9 @@ const corsOptions = {
   credentials: true,
   exposedHeaders: ['set-cookie']
 };
-
+app.use("/api/*", (req, res) => {
+  res.status(404).json({ error: "API endpoint not found" });
+});
 // Socket.io with enhanced options
 const io = new Server(server, {
   cors: corsOptions,

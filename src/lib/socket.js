@@ -6,26 +6,24 @@ export function initializeSocket(io) {
 
   io.use(async (socket, next) => {
     try {
-      // Try both cookie and auth token
-      const token = socket.request.cookies?.jwt || 
-                  socket.handshake.auth?.token;
+      // Get token from either cookies or handshake
+      const token = socket.request.cookies?.jwt || socket.handshake.auth?.token;
       
       if (!token) {
-        return next(new Error('Authentication error: No token provided'));
+        return next(new Error('Authentication error'));
       }
-
+  
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.userId).select("-password");
+      const user = await User.findById(decoded.userId);
       
       if (!user) {
-        return next(new Error('Authentication error: User not found'));
+        return next(new Error('User not found'));
       }
-
+  
       socket.user = user;
       next();
     } catch (error) {
-      console.log("Socket authentication error:", error.message);
-      next(new Error('Authentication error'));
+      next(new Error('Authentication failed'));
     }
   });
 
