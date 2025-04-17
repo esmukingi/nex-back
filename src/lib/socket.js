@@ -6,16 +6,13 @@ export function initializeSocket(io) {
 
   io.use(async (socket, next) => {
     try {
-      // Get token from either cookies or handshake
       const token = socket.request.cookies?.jwt || socket.handshake.auth?.token;
-      
       if (!token) {
-        return next(new Error('Authentication error'));
+        return next(new Error('Authentication error: No token provided'));
       }
   
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.userId);
-      
       if (!user) {
         return next(new Error('User not found'));
       }
@@ -23,6 +20,7 @@ export function initializeSocket(io) {
       socket.user = user;
       next();
     } catch (error) {
+      console.error('Socket auth error:', error.message);
       next(new Error('Authentication failed'));
     }
   });
