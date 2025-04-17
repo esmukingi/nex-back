@@ -3,9 +3,10 @@ import User from "../models/user.model.js";
 
 export const protectRoute = async (req, res, next) => {
   try {
-    // Check both cookies and Authorization header
-    const token = req.cookies.jwt || req.headers.authorization?.split(' ')[1];
-    
+    // Prioritize Authorization header, then cookie
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies.jwt;
+    console.log('ProtectRoute token:', { token, cookies: req.cookies, headers: req.headers.authorization });
+
     if (!token) {
       return res.status(401).json({ message: "Unauthorized - No Token Provided" });
     }
@@ -31,4 +32,4 @@ export const protectRoute = async (req, res, next) => {
     
     res.status(500).json({ message: "Internal server error" });
   }
-};  
+};

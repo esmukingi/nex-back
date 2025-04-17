@@ -6,7 +6,8 @@ export function initializeSocket(io) {
 
   io.use(async (socket, next) => {
     try {
-      const token = socket.request.cookies?.jwt;
+      // Check Authorization header first, then cookie
+      const token = socket.request.headers.authorization?.split(' ')[1] || socket.request.cookies?.jwt;
       console.log('Socket token received:', token);
       if (!token) {
         return next(new Error('Authentication error: No token provided'));

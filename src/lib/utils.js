@@ -13,6 +13,13 @@ export const generateToken = (userId, res) => {
     path: '/',
   });
 
-  console.log('Cookie set:', { token, secure: true, sameSite: 'none', path: '/', timestamp: new Date().toISOString() });
+  console.log('Cookie set:', {
+    token,
+    secure: true,
+    sameSite: 'none',
+    path: '/',
+    timestamp: new Date().toISOString(),
+    headers: res.getHeaders(),
+  });
   return token;
 };
